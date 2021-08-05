@@ -1,5 +1,11 @@
 # Yelp Camp
 
+YelpCamp is the main project of Colt Steele's 2021 Web Development bootcamp. 
+Built on HTML, CSS, JS, NodeJS with EJS. 
+Hosted on Mongo.
+The app offers full CRUD functionality.
+
+
 ## Middleware
 Middleware are functions that have access to the request `req` and response `res` objects. 
 Middleware can: 
