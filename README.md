@@ -130,3 +130,7 @@ And then in our `show.ejs` template we'll loop through the reviews for that camp
     </div>
 <% } %> 
 ```
+
+Express router likes to keep params separate. Routers get separate params, so you need to specify `{ mergeParams: true}` in order for parameters to be accessible for ALL routes. 
+In our case, if we don't merge the parameters, in our `reviews.js` routes, we won't have access to the campground id, even though it is included in the route (it will show up as an empty object). 
+`const router = express.Router({mergeParams: true});`
