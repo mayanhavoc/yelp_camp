@@ -3,15 +3,21 @@ const router = express.Router();
 const campgrounds = require('../controllers/campgrounds');
 const wrapAsync = require('../utilities/wrapAsync');
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware');
+const multer  = require('multer')
+const upload = multer({dest: 'uploads/'});
 const Campground = require('../models/campground');
 
 router.route('/')
     .get(wrapAsync(campgrounds.index))
-    .post( 
-        isLoggedIn, 
-        validateCampground, 
-        wrapAsync(campgrounds.createCampground)
-        );
+    // .post( 
+    //     isLoggedIn, 
+    //     validateCampground, 
+    //     wrapAsync(campgrounds.createCampground)
+    //     );
+    .post(upload.array('image'), (req, res)=> {
+        console.log(req.body, req.files)
+        res.send(`<h1>Image</h1>`)
+    })
 
 // router/new is a single route, no grouping required
 router

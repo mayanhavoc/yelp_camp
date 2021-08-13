@@ -391,3 +391,127 @@ router.route('/register')
 ```
 
 [Source: expressJS docs - router.route ](https://expressjs.com/en/5x/api.html#router.route)
+
+# Multiple image upload
+Two things to keep in mind from the get go: 
+1. A standard HTML form won't do, we'll need to modify it.
+2. We can't, or shouldn't use Mongo to update images because there is a 16mb size limit, there are workarounds, but it's not good practice. 
+
+If we want to upload files, we need to set the `enctype` of the form to `multipart/form-data`. 
+
+`enctype`
+
+If the value of the method attribute is post, enctype is the MIME type of the form submission. 
+
+Possible values:
+
+`application/x-www-form-urlencoded`: The default value.
+
+`multipart/form-data`: Use this if the form contains `<input>` elements with `type=file`.
+
+`text/plain`: Introduced by HTML5 for debugging purposes.
+
+This value can be overridden by formenctype attributes on `<button>, <input type="submit">, or <input type="image">` elements.
+
+[Source - MDN/html-forms](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form)
+
+In our project, in views/campgrounds/new:
+
+`<form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">`
+
+`<input type="file" name="image" id="image">`
+
+## Parsing multi-part forms
+In order to parse multi-part forms (the attribute we set up in the reference form above), we need to use another middleware.
+
+### The Multer middleware
+
+Multer is a node.js middleware for handling `multipart/form-data`, which is **primarily used for uploading files**. It is written on top of busboy for maximum efficiency.
+
+NOTE: **Multer will not process any form which is not multipart** (multipart/form-data).
+
+Multer **adds a body object and a file or files object to the request object**. The body object contains the values of the text fields of the form, the file or files object contains the files uploaded via the form.
+
+Multer does what express' `urlencoded` middleware does for JSON data, that is parse it. 
+`app.use(express.urlencoded({ extended: true }));`
+
+But to use it is a bit different: 
+1. Require multer
+2. Initialize
+3. Pass a configuration object
+4. Specify a destination path. 
+
+.single(fieldname)
+Accept a single file with the name fieldname. The single file will be stored in req.file.
+
+.array(fieldname[, maxCount])
+Accept an array of files, all with the name fieldname. Optionally error out if more than maxCount files are uploaded. The array of files will be stored in req.files.
+
+We can add `upload.single` middleware to the `post` route: 
+```Javascript
+.post(upload.single('image'), (req, res)=> {
+        console.log(req.body, req.file)
+    })
+```
+Output
+```Javascript
+Session {
+  cookie: {
+    path: '/',
+    _expires: 2021-08-20T22:55:33.259Z,
+    originalMaxAge: 604800000,
+    httpOnly: true
+  },
+  flash: {},
+  passport: { user: 'Simon' }
+}
+[Object: null prototype] {
+  campground: [Object: null prototype] {
+    title: 'asdasd',
+    location: 'asdasd',
+    price: '12',
+    description: 'asdasd'
+  }
+} {
+  fieldname: 'image',
+  originalname: 'Magic_Paper__OG_Magic.png',
+  encoding: '7bit',
+  mimetype: 'image/png',
+  destination: 'uploads/',
+  filename: '7ba30aa9729e6fcea7d1748dbc3dd795',
+  path: 'uploads/7ba30aa9729e6fcea7d1748dbc3dd795',
+  size: 343009
+}
+```
+A path to the upload, filename, destination, etc. Info about our file and where it is and it also creates an 'uploads' folder where it will temporary store files until we set up Cloudinary. 
+
+[Source - npm/multer](https://www.npmjs.com/package/multer)
+
+## .dotenv
+
+Dotenv is a zero-dependency module that loads environment variables from a .env file into [`process.env`](https://nodejs.org/docs/latest/api/process.html#process_process_env). Storing configuration in the environment separate from code is based on The [Twelve-Factor App methodology](http://12factor.net/config).
+
+### Configuring dotenv
+
+In our app.js
+
+```Javascript
+if(process.env.NODE_ENV !== "production"){
+    require('dotenv').config();
+}
+```
+
+And then store whatever information you need in `.env` in the form of **key: value** pairs.
+
+`CLOUDINARY_NAME = cloudname` 
+
+**DO NOT** use quotes or spaces for your values.
+
+[Source - npm/dotenv](https://www.npmjs.com/package/dotenv)
+
+
+## Cloudinary
+Instead we'll use Cloudinary.
+
+
+
