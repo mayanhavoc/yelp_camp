@@ -27,7 +27,7 @@ router.get('/:id', wrapAsync(async (req, res) => {
         path:'reviews',
         populate: {
             path: 'author'
-        }
+        },
     }).populate('author');
     if(!campground){
         req.flash('error', 'Campground not found.');

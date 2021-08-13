@@ -5,7 +5,7 @@ const ExpressError = require('../utilities/ExpressError');
 const Campground = require('../models/campground');
 const Review = require('../models/review');
 const { reviewSchema } = require('../schemas');
-const { validateReview, isLoggedIn } = require('../middleware');
+const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware');
 
 router.post('/', isLoggedIn, validateReview, wrapAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id);
@@ -18,7 +18,7 @@ router.post('/', isLoggedIn, validateReview, wrapAsync(async(req, res) => {
     res.redirect(`/campgrounds/${campground._id}`);
 }))
 
-router.delete('/:reviewId', wrapAsync(async(req, res) => {
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, wrapAsync(async(req, res) => {
     // delete the ONE ObjectId that corresponds to the campground review using the Mongo pull operator
     const {id, reviewId } = req.params;
     Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}})

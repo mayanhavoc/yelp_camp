@@ -35,6 +35,18 @@ module.exports.isAuthor = async (req, res, next) => {
     next();
 }
 
+module.exports.isReviewAuthor = async (req, res, next) => {
+    // our actual route to delete is /campgrounds/id/reviews/reviewId, so we need to include the campground id(for the redirect) from the req.params
+    // in routes/review.js | router.delete(':/reviewId', ...) -> we have to use the name of the path
+    const { id, reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+    if(!review.author.equals(req.user._id)) {
+        req.flash('error', 'You don\'t have permission to delete this review.');
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
+}
+
 module.exports.validateReview = (req, res, next) => {
     const { error } = reviewSchema.validate(req.body);
     if(error){
