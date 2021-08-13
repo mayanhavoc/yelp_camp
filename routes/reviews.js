@@ -8,8 +8,16 @@ const reviews = require('../controllers/reviews');
 const { reviewSchema } = require('../schemas');
 const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware');
 
-router.post('/', isLoggedIn, validateReview, wrapAsync(reviews.createReview));
+router.post('/', 
+    isLoggedIn, 
+    validateReview, 
+    wrapAsync(reviews.createReview)
+    );
 
-router.delete('/:reviewId', isLoggedIn, isReviewAuthor, wrapAsync(reviews.deleteReview));
+router.delete('/:reviewId', 
+    isLoggedIn, 
+    isReviewAuthor, 
+    wrapAsync(reviews.deleteReview)
+    );
 
 module.exports = router;

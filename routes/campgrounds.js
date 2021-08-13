@@ -5,24 +5,34 @@ const wrapAsync = require('../utilities/wrapAsync');
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware');
 const Campground = require('../models/campground');
 
+router.route('/')
+    .get(wrapAsync(campgrounds.index))
+    .post( 
+        isLoggedIn, 
+        validateCampground, 
+        wrapAsync(campgrounds.createCampground)
+        );
 
-router.get('/', 
-    wrapAsync(campgrounds.index)
-    );
-
-router.get('/new', 
+// router/new is a single route, no grouping required
+router
+    .get('/new', 
     isLoggedIn, 
     campgrounds.renderNewForm
     );
+// ------
 
-router.post('/', 
-    isLoggedIn, 
-    validateCampground, 
-    wrapAsync(campgrounds.createCampground)
-    );
-
-router.get('/:id', 
-    wrapAsync(campgrounds.showCampground)
+router.route('/:id')
+    .get(wrapAsync(campgrounds.showCampground))
+    .put( 
+        isLoggedIn, 
+        isAuthor, 
+        validateCampground, 
+        wrapAsync(campgrounds.updateCampground)
+    )
+    .delete( 
+        isLoggedIn, 
+        isAuthor, 
+        wrapAsync(campgrounds.deleteCampground)
     );
 
 router.get('/:id/edit', 
@@ -31,17 +41,34 @@ router.get('/:id/edit',
     wrapAsync(campgrounds.renderEditForm)
     );
 
-router.put('/:id', 
-    isLoggedIn, 
-    isAuthor, 
-    validateCampground, 
-    wrapAsync(campgrounds.updateCampground)
-    );
-
-router.delete('/:id', 
-    isLoggedIn, 
-    isAuthor, 
-    wrapAsync(campgrounds.deleteCampground)
-    );
-
 module.exports = router;
+
+// router.get('/', 
+//     wrapAsync(campgrounds.index)
+//     );
+
+
+// router.post('/', 
+//     isLoggedIn, 
+//     validateCampground, 
+//     wrapAsync(campgrounds.createCampground)
+//     );
+
+// router.get('/:id', 
+//     wrapAsync(campgrounds.showCampground)
+//     );
+
+
+// router.put('/:id', 
+//     isLoggedIn, 
+//     isAuthor, 
+//     validateCampground, 
+//     wrapAsync(campgrounds.updateCampground)
+//     );
+
+// router.delete('/:id', 
+//     isLoggedIn, 
+//     isAuthor, 
+//     wrapAsync(campgrounds.deleteCampground)
+//     );
+
