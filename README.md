@@ -305,3 +305,39 @@ First, hide edit/delete buttons if they are not the author. This is simple and i
 <% } %>
 ```
 If `campground.author` is empty, our code will break, so we make sure it's not empty by including `currentUser`. 
+
+# Model - view -controller 
+MVC is not a pattern unique to express. Controller is just a file that exports a function with functionality. 
+For example, this logic: 
+```Javascript
+wrapAsync(async (req, res, next) => {
+    const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
+    await campground.save();
+    req.flash('success', 'Successfully made a new campground');
+    res.redirect(`/campgrounds/${campground._id}`);
+})
+```
+This is the logic we use to create a **new campground**, we'll move this to our **campground controller** and we'll give it a name (i.e. createCampground and then pass it through our router). This will help us abstract our routes as much as possible, making them easier to read and understand what they are doing at a glance. Also the function names we can give them can help clarify what we are doing with them. 
+
+## MVC framework
+MVC is an approach to structuring applications. We've been using models and views already. The basic concept is the following: 
+Model - data, modeling of data
+View - layout, everything the user sees
+Controller - rendering views, the business logic
+
+Our routes will look like this now: 
+`router.get('/', wrapAsync());`
+
+And our controllers will look like this: 
+```Javascript
+module.exports.index = async (req, res) => {
+    const campgrounds = await Campground.find({})
+    res.render('campgrounds/index', { campgrounds });
+}
+```
+
+Make sure you remember to require the controller in the router: 
+In routes/campgrounds: `const campgrounds = require('../controllers/campgrounds')`
+
+
