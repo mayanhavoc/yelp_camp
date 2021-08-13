@@ -208,6 +208,62 @@ How to store and delete user information.
 ### The register method
 `register(user, password, cb)` Convenience method to register a new user instance with a given password. Checks if username is unique. See [login](https://github.com/saintedlama/passport-local-mongoose/tree/master/examples/login) example.
 
+### Passport's `req.user`
+Passport automatically includes a `user` in the `req` object which will gives us the *deserialized* information about the user. This allows us to do things like hide routes dynamically according to whether the user is registered/logged on/logged out. 
+
+```Javascript
+req.user... {
+  _id: 6115b650ed0b23531fc86390,
+  email: 'john@john.com',
+  username: 'John',
+  __v: 0
+}
+```
+
+In our `app.js`
+```Javascript
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
+```
+`res.locals.currentUser = req.user` will gives us access to `req.user` on every route. This way we can dynamically set our routes. 
+
+### `req.login`
+Passport gives us the functionality so that when users **register** they are **NOT** redirected, but logged in automatically. 
+
+Passport exposes a login() function on req (also aliased as logIn()) that can be used to establish a login session.
+```Javascript
+req.login(user, function(err) {
+  if (err) { return next(err); }
+  return res.redirect('/users/' + req.user.username);
+});
+```
+When the login operation completes, user will be assigned to `req.user`.
+Note: `passport.authenticate()` middleware invokes `req.login()` automatically. This function is primarily used when users sign up, during which `req.login()` can be invoked to automatically log in the newly registered user.
+
+```Javascript
+router.post('/register', wrapAsync(async(req, res, next) => {
+    try {
+        const {email, username, password} = req.body;
+        const user = new User({email, username});
+        const registeredUser = await User.register(user, password);
+        req.login(registeredUser, err => {
+            if(err) return next(err);
+            req.flash('success', 'Welcome to YelpCamp');
+            res.redirect('/campgrounds');
+        })
+    } catch (e) {
+        req.flash('error', e.message);
+        res.redirect('register');
+    }
+}));
+```
+
+[Source: passport docs/operations](http://www.passportjs.org/docs/login/)
+
 [Source: passport docs](http://www.passportjs.org/docs/)
 
 [Source: npm - passport walkthrough](http://mherman.org/blog/2013/11/11/user-authentication-with-passport-dot-js/)
@@ -217,3 +273,21 @@ How to store and delete user information.
 [Source: passport JS docs - strategies](http://www.passportjs.org/packages/)
 
 [Source: passport JS docs](http://www.passportjs.org/docs/downloads/html/)
+
+## ReturnTo Behavior
+Redirecting the user to wherever they wanted to go. We keep track of where the user was initially requesting. 
+
+For example, in our case, whether the request was made when they are trying to log in or when we are verifying that they are authenticated, if they're not, we can just store the URL they are requesting and then redirect.
+
+In `middleware.js`
+```Javascript
+module.exports.isLoggedIn = (req, res, next) => {
+    if(!req.isAuthenticated()){
+        //store the url they are requesting
+        req.flash('error', 'You must be signed in');
+        return  res.redirect('/login');
+    }
+    next();
+}
+```
+
