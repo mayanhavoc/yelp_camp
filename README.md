@@ -291,3 +291,17 @@ module.exports.isLoggedIn = (req, res, next) => {
 }
 ```
 
+# Authorization
+First, hide edit/delete buttons if they are not the author. This is simple and is done by adding a conditional to the template:
+
+```Javascript
+<% if(currentUser && campground.author.equals(currentUser._id)) { %> 
+    <div class="card-body">
+        <a class="card-link btn btn-info" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+        <form class="d-inline" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+            <button class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+<% } %>
+```
+If `campground.author` is empty, our code will break, so we make sure it's not empty by including `currentUser`. 
