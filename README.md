@@ -134,3 +134,86 @@ And then in our `show.ejs` template we'll loop through the reviews for that camp
 Express router likes to keep params separate. Routers get separate params, so you need to specify `{ mergeParams: true}` in order for parameters to be accessible for ALL routes. 
 In our case, if we don't merge the parameters, in our `reviews.js` routes, we won't have access to the campground id, even though it is included in the route (it will show up as an empty object). 
 `const router = express.Router({mergeParams: true});`
+
+## Authentication with passport JS
+To use passport local we need to install `passport`, `passport local` and `passport-local-mongoose`
+
+`npm install passport-local-mongoose`
+
+Passport-Local Mongoose does not require passport or mongoose dependencies directly but expects you to have these dependencies installed.
+
+In case you need to install the whole set of dependencies
+
+`npm install passport mongoose passport-local-mongoose`
+
+### Usage
+Plugin Passport-Local Mongoose
+First you need to plugin Passport-Local Mongoose into your User schema
+
+```Javascript
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const passportLocalMongoose = require('passport-local-mongoose');
+
+const User = new Schema({});
+
+User.plugin(passportLocalMongoose);
+
+module.exports = mongoose.model('User', User);
+```
+
+You're free to define your User how you like. **Passport-Local Mongoose will add a username, hash and salt field to store the username, the hashed password and the salt value.**
+Additionally Passport-Local Mongoose adds some methods to your Schema. See the [API Documentation](https://github.com/saintedlama/passport-local-mongoose#api-documentation) section for more details.
+
+### Passport.initialize and Passport.session
+
+#### **Middleware**
+In a Connect or Express-based application, passport.initialize() middleware is required to initialize Passport. If your application uses persistent login sessions, passport.session() middleware must also be used.
+
+```Javascript
+app.configure(function() {
+  app.use(express.static('public'));
+  app.use(express.cookieParser());
+  app.use(express.bodyParser());
+  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(app.router);
+});
+```
+Note that *enabling session support is entirely optional, though it is recommended for most applications*. **If enabled, be sure to use session() before passport.session() to ensure that the login session is restored in the correct order**.
+
+#### **Static methods**
+Static methods are exposed on the model constructor. For example to use `createStrategy` function use
+
+```Javascript
+const User = require('./models/user');
+User.createStrategy();
+```
+
+**authenticate() Generates a function that is used in Passport's LocalStrategy**
+`passport.use(new LocalStrategy(User.authenticate()));`
+serializeUser() Generates a function that is used by Passport to serialize users into the session
+deserializeUser() Generates a function that is used by Passport to deserialize users into the session
+register(user, password, cb) Convenience method to register a new user instance with a given password. Checks if username is unique. See login example.
+findByUsername() Convenience method to find a user instance by it's unique username.
+createStrategy() Creates a configured passport-local LocalStrategy instance that can be used in passport.
+
+### Serialize vs Deserialize
+How to store and delete user information. 
+
+`serializeUser()` Generates a function that is used by Passport to serialize users into the session
+`deserializeUser()` Generates a function that is used by Passport to deserialize users into the session
+
+### The register method
+`register(user, password, cb)` Convenience method to register a new user instance with a given password. Checks if username is unique. See [login](https://github.com/saintedlama/passport-local-mongoose/tree/master/examples/login) example.
+
+[Source: passport docs](http://www.passportjs.org/docs/)
+
+[Source: npm - passport walkthrough](http://mherman.org/blog/2013/11/11/user-authentication-with-passport-dot-js/)
+
+[Source: passport-local mongoose ](https://www.npmjs.com/package/passport-local-mongoose)
+
+[Source: passport JS docs - strategies](http://www.passportjs.org/packages/)
+
+[Source: passport JS docs](http://www.passportjs.org/docs/downloads/html/)
