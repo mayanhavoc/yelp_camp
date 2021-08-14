@@ -10,15 +10,13 @@ const upload = multer({ storage });
 
 router.route('/')
     .get(wrapAsync(campgrounds.index))
-    // .post( 
-    //     isLoggedIn, 
-    //     validateCampground, 
-    //     wrapAsync(campgrounds.createCampground)
-    //     );
-    .post(upload.array('image'), (req, res)=> {
-        console.log(req.body, req.files)
-        res.send(`<h1>Image</h1>`)
-    })
+    .post( 
+        isLoggedIn, 
+        upload.array('image'),
+        validateCampground, 
+        wrapAsync(campgrounds.createCampground)
+        );
+  
 
 // router/new is a single route, no grouping required
 router
