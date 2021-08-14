@@ -549,5 +549,165 @@ Instead we'll use Cloudinary.
 The only difference between posting the images and updating the images is that instead of creating a new array, with our `put` we are only adding to the array, so we just use `campground.images.push = req.files...`.
 
 
+# Geocoding
+There are plenty of geo-coding options available.
+
+## Mapbox
+
+### npm mapbox sdk
+
+#### Parameters
+`config` Object
+`config.query` string A place name.
+`config.mode` ("mapbox.places" | "mapbox.places-permanent") Either mapbox.places for ephemeral geocoding, or mapbox.places-permanent for storing results and batch geocoding. (optional, default "mapbox.places")
+`config.countries` Array<string>? Limits results to the specified countries. Each item in the array should be an ISO 3166 alpha 2 country code.
+`config.proximity` Coordinates? Bias local results based on a provided location.
+`config.types` Array<("country" | "region" | "postcode" | "district" | "place" | "locality" | "neighborhood" | "address" | "poi" | "poi.landmark")>? Filter results by feature types.
+`config.autocomplete` boolean Return autocomplete results or not. (optional, default true)
+`config.bbox` BoundingBox? Limit results to a bounding box.
+`config.limit` number Limit the number of results returned. (optional, default 5)
+`config.language` Array<string>? Specify the language to use for response text and, for forward geocoding, query result weighting. Options are IETF language tags comprised of a mandatory ISO 639-1 language code and optionally one or more IETF subtags for country or script.
+`config.routing` boolean Specify whether to request additional metadata about the recommended navigation destination. Only applicable for address features. (optional, default false)
 
 
+```Javascript
+geocodingClient.forwardGeocode({
+  query: 'Paris, France',
+  limit: 2
+})
+  .send()
+  .then(response => {
+    const match = response.body;
+  });
+// geocoding with proximity
+geocodingClient.forwardGeocode({
+  query: 'Paris, France',
+  proximity: [-95.4431142, 33.6875431]
+})
+  .send()
+  .then(response => {
+    const match = response.body;
+  });
+
+// geocoding with countries
+geocodingClient.forwardGeocode({
+  query: 'Paris, France',
+  countries: ['fr']
+})
+  .send()
+  .then(response => {
+    const match = response.body;
+  });
+
+// geocoding with bounding box
+geocodingClient.forwardGeocode({
+  query: 'Paris, France',
+  bbox: [2.14, 48.72, 2.55, 48.96]
+})
+  .send()
+  .then(response => {
+    const match = response.body;
+  });
+```
+
+`npm install @mapbox/mapbox-sdk`
+[Source - npm mapbox-sdk](https://www.npmjs.com/package/@mapbox/mapbox-sdk)
+[Source - github full mapbox docs](https://github.com/mapbox/mapbox-sdk-js/blob/HEAD/docs/services.md)
+[Source - github full mapboxdocs/forward-geocoding](https://github.com/mapbox/mapbox-sdk-js/blob/HEAD/docs/services.md#forwardgeocode)
+[Source - Mapbox docs](https://docs.mapbox.com/)
+
+
+### Using GeoJSON with mongooose
+
+GeoJSON is a format for storing geographic points and polygons. MongoDB has excellent support for geospatial queries on GeoJSON objects. Let's take a look at how you can use Mongoose to store and query GeoJSON objects.
+
+**Point Schema**
+
+The most simple structure in GeoJSON is a point. Below is an example point representing the approximate location of San Francisco. Note that longitude comes first in a GeoJSON coordinate array, not latitude.
+
+```Javascript
+{
+  "type" : "Point",
+  "coordinates" : [
+    -122.5,
+    37.7
+  ]
+}
+```
+
+Below is an example of a Mongoose schema where location is a point.
+
+```Javascript
+const citySchema = new mongoose.Schema({
+  name: String,
+  location: {
+    type: {
+      type: String, // Don't do `{ location: { type: String } }`
+      enum: ['Point'], // 'location.type' must be 'Point'
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
+  }
+});
+```
+
+[Source - mongoose docs/usingGeoJSON](https://mongoosejs.com/docs/geojson.html)
+
+
+### Rendering maps with Mapbox
+
+#### Mapbox GL JS
+
+[Source - mapboxDocs/mapbox-GL-JS](https://docs.mapbox.com/mapbox-gl-js/guides/)
+
+##### Add a default marker to a web map
+
+
+
+```Javascript 
+  // <script>
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWljb2NoYW5nbyIsImEiOiJja3NjNTN3ZWYwZGV3MzFueTdoNmd1c2V1In0.Zk4U-ge26gvSowQ0_vSSmQ';
+  
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [12.550343, 55.665957],
+    zoom: 8
+  });
+
+  // Create a default Marker and add it to the map
+  
+  const marker1 = new mapboxgl.Marker()
+    .setLngLat([12.554729, 55.70651])
+    .addTo(map);
+
+  // Create a default Marker, colored black, rotated 45 degrees.**
+  
+  const marker2 = new mapboxgl.Marker({ color: 'black', rotation: 45 })
+    .setLngLat([12.65147, 55.608166])
+    .addTo(map);
+  
+  // </script>
+```
+
+In our `public/JS/showPageMap.js`
+```Javascript
+mapboxgl.accessToken = mapToken;
+const map = new mapboxgl.Map({
+    container: 'map', // container ID
+    style: 'mapbox://styles/mapbox/streets-v11', // style URL
+    center: [-74.5, 40], // starting position [lng, lat]
+    zoom: 9 // starting zoom
+});
+
+new mapboxgl.Marker()
+    .setLngLat([-74.5, 40])
+    .addTo(map)
+```
+
+
+[Source - mapboxDocs/mapbox-GL-JS/examples](https://docs.mapbox.com/mapbox-gl-js/example/add-a-marker/)
