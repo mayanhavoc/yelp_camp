@@ -540,13 +540,14 @@ app.post('/upload', parser.single('image'), function (req, res) {
 });
 ```
 
-
-
 [Source npm/multer-storage-cloudinary](https://www.npmjs.com/package/multer-storage-cloudinary)
-
 
 ## Cloudinary
 Instead we'll use Cloudinary.
+
+### Uploading the images
+The only difference between posting the images and updating the images is that instead of creating a new array, with our `put` we are only adding to the array, so we just use `campground.images.push = req.files...`.
+
 
 
 
