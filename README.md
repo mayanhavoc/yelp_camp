@@ -1032,3 +1032,58 @@ If we compare it to the headers we get when we disable `app.use(helmet())`:
 Related articles: 
 [What is a Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
+# Deploying
+
+`npm install connect-mongo`
+
+**Usage**
+Express or Connect integration
+Express 4.x, 5.0 and Connect 3.x:
+
+```Javascript
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
+app.use(session({
+  secret: 'foo',
+  store: MongoStore.create(options)
+}));
+import session from 'express-session'
+import MongoStore from 'connect-mongo'
+
+app.use(session({
+  secret: 'foo',
+  store: MongoStore.create(options)
+}));
+```
+**Connection to MongoDB**
+In many circumstances, connect-mongo will not be the only part of your application which need a connection to a MongoDB database. It could be interesting to re-use an existing connection.
+
+Alternatively, you can configure connect-mongo to establish a new connection.
+
+Create a new connection from a MongoDB connection string
+MongoDB connection strings are the best way to configure a new connection. For advanced usage, more options can be configured with mongoOptions property.
+
+```Javascript
+// Basic usage
+app.use(session({
+  store: MongoStore.create({ mongoUrl: 'mongodb://localhost/test-app' })
+}));
+
+// Advanced usage
+app.use(session({
+  store: MongoStore.create({
+    mongoUrl: 'mongodb://user12345:foobar@localhost/test-app?authSource=admin&w=1',
+    mongoOptions: advancedOptions // See below for details
+  })
+}));
+```
+
+[Source - npm/connect-mongo](https://www.npmjs.com/package/connect-mongo)
+
+## Heroku 
+
+
+[Source - Heroku docs/The Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
+[Source - Heroku docs](https://devcenter.heroku.com/)
