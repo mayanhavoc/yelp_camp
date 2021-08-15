@@ -1131,6 +1131,21 @@ So far, we've been using `nodemon` to run our application, but that doesn't for 
 
 We also need to change the PORT: 
 
+```Javascript
+const port = process.env.PORT || 3000;
+app.listen(3000, () => {
+    console.log(`Running on port ${port}`)
+})
+```
+
+### Configuring Heroku environment variables
+So far, we've been using .env to configure our environment variables, but with heroku, we can configure our environment variables in two ways: 
+
+1. Through the application dashboard: `dashboard/settings/config-vars`
+2. Through the command line: `heroku config:set SECRET=...`
+
+
+![Configuring heroku environment vars](/public/images/heroku_config_variables.png)
 
 
 
