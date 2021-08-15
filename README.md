@@ -5,6 +5,19 @@ Built on HTML, CSS, JS, NodeJS with EJS.
 Hosted on Mongo.
 The app offers full CRUD functionality.
 
+# YelpCamp feature inventory
+1. Full CRUD
+2. Maps
+3. Ratings
+4. Reviews
+5. Authentication
+6. Authorization
+7. Validation
+8. Image upload
+9. Cluster map
+10. MongoDB
+11. Virtual properties
+12. Mongoose middleware
 
 ## Middleware
 Middleware are functions that have access to the request `req` and response `res` objects. 
@@ -857,3 +870,6 @@ map.on('mouseleave', 'clusters', () => {
 ```
 
 [Source - mapboxdocs/mapbox-gl-js/example/cluster/](https://docs.mapbox.com/mapbox-gl-js/example/cluster/)
+
+
+
