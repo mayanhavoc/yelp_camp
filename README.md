@@ -1083,7 +1083,55 @@ app.use(session({
 
 ## Heroku 
 
-
 [Source - Heroku docs/The Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
+Because we are running our app through Heroku, we don't have access to our normal output in the console to tell us what went wrong. 
+Heroku does provide the command `heroku logs --tail` which we can run in the terminal: 
+
+```Javascript
+macadmin@C02RK1VAFVH6 YelpCamp % heroku logs --tail  
+2021-08-15T18:36:10.867357+00:00 app[api]: Release v1 created by user 
+2021-08-15T18:36:10.867357+00:00 app[api]: Initial release by user 
+2021-08-15T18:36:11.103341+00:00 app[api]: Enable Logplex by user 
+2021-08-15T18:36:11.103341+00:00 app[api]: Release v2 created by user 
+2021-08-15T18:49:09.000000+00:00 app[api]: Build started by user 
+2021-08-15T18:49:33.770398+00:00 app[api]: Release v3 created by user 
+2021-08-15T18:49:33.770398+00:00 app[api]: Deploy 49b939ce by user 
+2021-08-15T18:49:33.786605+00:00 app[api]: Scaled to web@1:Free by user 
+2021-08-15T18:49:35.000000+00:00 app[api]: Build succeeded
+2021-08-15T18:49:36.492944+00:00 heroku[web.1]: Starting process with command `npm start`
+2021-08-15T18:49:38.860573+00:00 app[web.1]: npm ERR! missing script: start
+2021-08-15T18:49:38.864000+00:00 app[web.1]: 
+2021-08-15T18:49:38.864214+00:00 app[web.1]: npm ERR! A complete log of this run can be found in:
+2021-08-15T18:49:38.864270+00:00 app[web.1]: npm ERR!     /app/.npm/_logs/2021-08-15T18_49_38_861Z-debug.log
+2021-08-15T18:49:38.919129+00:00 heroku[web.1]: Process exited with status 1
+2021-08-15T18:49:38.988282+00:00 heroku[web.1]: State changed from starting to crashed
+2021-08-15T18:49:38.993785+00:00 heroku[web.1]: State changed from crashed to starting
+2021-08-15T18:49:41.336826+00:00 heroku[web.1]: Starting process with command `npm start`
+2021-08-15T18:49:43.400419+00:00 app[web.1]: npm ERR! missing script: start
+2021-08-15T18:49:43.405856+00:00 app[web.1]: 
+2021-08-15T18:49:43.406015+00:00 app[web.1]: npm ERR! A complete log of this run can be found in:
+2021-08-15T18:49:43.406066+00:00 app[web.1]: npm ERR!     /app/.npm/_logs/2021-08-15T18_49_43_400Z-debug.log
+2021-08-15T18:49:43.450922+00:00 heroku[web.1]: Process exited with status 1
+2021-08-15T18:49:43.515283+00:00 heroku[web.1]: State changed from starting to crashed
+2021-08-15T18:50:18.377583+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/" host=morning-escarpment-23674.herokuapp.com request_id=47ebaddf-8bff-4049-83af-fd5bb79739e3 fwd="108.66.17.229" dyno= connect= service= status=503 bytes= protocol=https
+2021-08-15T18:50:19.747374+00:00 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/favicon.ico" host=morning-escarpment-23674.herokuapp.com request_id=07195076-345d-4a99-bf54-9322ad8a64f1 fwd="108.66.17.229" dyno= connect= service= status=503 bytes= protocol=https
+```
+
+Heroku doesn't know how to run our application!
+
+So far, we've been using `nodemon` to run our application, but that doesn't for Heroku. We need to specify a start command for Heroku in our `package.json` file.
+
+```Javascript
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+```
+
+We also need to change the PORT: 
+
+
+
 
 [Source - Heroku docs](https://devcenter.heroku.com/)
