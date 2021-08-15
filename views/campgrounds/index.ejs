@@ -1,4 +1,3 @@
-
     <% layout('layouts/boilerplate') %>
     <div id="cluster-map"></div>
     <h1>All Campgrounds</h1>
@@ -31,6 +30,6 @@
     <script>
         const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
         const campgrounds = {features: <%- JSON.stringify(campgrounds) %>}
-      </script>
+    </script>
     
-<script src="/JS/clustermap.js"></script>
+<script src="/JS/clusterMap.js"></script>
