@@ -1,8 +1,9 @@
     <% layout('layouts/boilerplate') %>
-    <div id="cluster-map"></div>
-    <h1>All Campgrounds</h1>
+    <div class="mb-3" id="cluster-map"></div>
+    <h1>Where are you going?</h1>
     <div>
-        <a href="/campgrounds/new">Add campground</a>
+        <p>Know any good spots? Feel free to add your own and help us spread the joy!</p>
+        <a class="btn btn-success mb-3" href="/campgrounds/new">Add lodging</a>
     </div>
     <% for (let campground of campgrounds) { %>
     <div class="card mb-3">
