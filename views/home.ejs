@@ -9,8 +9,32 @@
       <title>Discover | Guatemala</title>
   </head>
   <body class="d-flex text-center text-white bg-dark">
-    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-        <header class="mb-auto">
+    <div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <nav class="navbar navbar-expand-lg navbar-dark mb-auto mx-2">
+            <div class="container-fluid">
+                <h3 class="float-start ms-2 mb-0">Discover <span style="color: #00ACEE">Guatemala</span></h3>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+                <div class="navbar-nav flex-column pl-5">
+                    <div class="d-flex flex-row justify-content-center">
+                      <a href="/" class="nav-link"            aria-current="page">Home</a>
+                      <a href="/campgrounds" class="nav-link">Lodging</a>
+                      <% if(!currentUser) { %>
+                        <div class="d-flex justify-content-end">
+                            <a href="/login" class="nav-link">Login</a>
+                            <a href="/register" class="nav-link">Register</a>
+                            <% } else { %> 
+                            <a href="/logout" class="nav-link">Logout</a>
+                        </div> 
+                      <% } %> 
+                    </div>
+                </div>
+              </div>
+            </div>
+          </nav>
+        <!-- <header class="mb-auto">
             <div>
                 <h3 class="float-md-start mb-0">Discover | Guatemala</h3>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
@@ -24,11 +48,11 @@
                     <% } %> 
                 </nav>
             </div>
-        </header>
+        </header> -->
         <main class="px-3">
-            <h1>Discover Guatemala,</h1>
+            <h1>Discover <span style="color: #00ACEE">Guatemala</span>,</h1>
             <p class="lead"><br>Visit the lush jungles of Tikal or experience the bustling sunday markets in Chichicastenango. Take a walk through the colonial streets of Antigua, or take a boat ride around Lake Atitlan, or maybe climb a volcano or two. <br> Whatever you choose, a world of new tastes, sounds and sights awaits you.</p>
-            <a href="/campgrounds" class="btn btn-lg btn-secondary font-weight-bold bg-white">Search lodging</a>
+            <a href="/campgrounds" class="btn btn-lg btn-secondary font-weight-bold text-white" style="background-color: #00ACEE;">Search lodging</a>
         </main>
 
         <footer class="mt-auto text-white-50">&copy; powered by micochango</footer>
